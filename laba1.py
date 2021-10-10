@@ -300,34 +300,35 @@ def export_to_database3(conn_post, conn_my):
     cursor = conn_my.cursor()
     cursorObj.execute("SELECT * FROM departament")
     departament = cursorObj.fetchall()
-    post_records = ", ".join(["%s"] * len(departament))
-    query_dep = f"INSERT INTO departament (departamentid, name, responsible_for) VALUES {post_records} " \
-                f"ON CONFLICT(departamentid) DO NOTHING"
-
+    post_records = ", ".join(["%s"] * len(departament[0]))
+    query_dep = f"REPLACE departament (departamentid, name, responsible_for) VALUES ({post_records}) "
     cursorObj.execute("SELECT * FROM employees")
     employees = cursorObj.fetchall()
-    employees_records = ", ".join(["%s"] * len(employees))
-    query_employee = f"INSERT INTO employees (employeeid, name,  departamentid, position) VALUES {employees_records}"\
-                f"ON CONFLICT(employeeid) DO NOTHING"
+    employees_records = ", ".join(["%s"] * len(employees[0]))
+    query_employee = f"REPLACE employees (employeeid, name,  position, departamentid) VALUES ({employees_records}) "
     # обновляємо в database_2 таблицю завдань і імпортуємо змінені записи в database_3
-    cursorObj.execute("UPDATE tasks SET status = 'verified' WHERE status = 'done'")
+    cursorObj.execute(
+        "UPDATE tasks SET status = 'verified' WHERE status = 'done'")
     cursorObj.execute("SELECT * FROM tasks where status='verified'")
     tasks = cursorObj.fetchall()
-    tasks_records = ", ".join(["%s"] * len(tasks))
-    query_tasks = f"INSERT INTO tasks (taskid, taskname, status, employeeid) VALUES {tasks_records}"\
-                f"ON CONFLICT(taskid) DO NOTHING"
-    #вивід експортованих даних в таблицю в графічному інтерфейсі
+    tasks_records = ", ".join(["%s"] * len(tasks[0]))
+    query_tasks = f"REPLACE tasks (taskid, taskname, status, employeeid) VALUES ({tasks_records}) "
+    # вивід експортованих даних в таблицю в графічному інтерфейсі
     for i in table.get_children():
         table.delete(i)
     cursorObj.execute("SELECT * FROM tasks where status='verified'")
     rows = cursorObj.fetchall()
-    print(rows)
     for row in rows:
         table.insert("", END, values=row)
     conn_my.autocommit = True
-    cursor.execute(query_dep, departament)
-    cursor.execute(query_employee, employees)
-    cursor.execute(query_tasks, tasks)
+    cursor.execute('SET FOREIGN_KEY_CHECKS=0')
+    for i in departament:
+        cursor.execute(query_dep, list(i))
+    for j in employees:
+        cursor.execute(query_employee, list(j))
+    for k in tasks:
+        cursor.execute(query_tasks, list(k))
+    cursor.execute('SET FOREIGN_KEY_CHECKS=1')
     print('success export to db3')
 
 # якщо ця змінна набуває значення false, то бази даних ще не були створені і заповнені, тому це потрібно зробити, якщо
@@ -338,9 +339,9 @@ posgre_con = postgree_connection()
 con = sql_connect()
 mysql_con = mysql_connection()
 if not is_database_exists:
-    sql_table()
+    sql_table(con)
     create_mysql_tables(mysql_con)
-    create_database(posgre_con)
+    create_postgre_database(posgre_con)
     create_postgre_tables(posgre_con)
     # добавлення записів в таблиці відділів і працівників, таблиця задач(tasks) буде заповнюватися через графічний інтерфейс
     depart_insert(con, ("loafers2", "do nothing"))
