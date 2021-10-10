@@ -165,9 +165,9 @@ def postgree_connection():
         connection = psycopg2.connect(
             database="postgres",
             user="postgres",
-            password="labs19",
+            password="1111",
             host="127.0.0.1",
-            port="5432",
+            port="1111",
         )
         print("Connection to PostgreSQL DB successful")
     except OperationalError as e:
@@ -241,8 +241,8 @@ def mysql_connection():
     try:
         connection = mysql.connector.connect(
             host="127.0.0.1",
-            user="mysqluser",
-            password="labs19",
+            user="root",
+            password="1111",
 
         )
         print("Connection to MySQL DB successful")
@@ -253,8 +253,8 @@ def mysql_connection():
     try:
         connection = mysql.connector.connect(
             host="127.0.0.1",
-            user="mysqluser",
-            password="labs19",
+            user="root",
+            password="1111",
             database="database_3"
 
         )
@@ -333,7 +333,7 @@ def export_to_database3(conn_post, conn_my):
 
 # якщо ця змінна набуває значення false, то бази даних ще не були створені і заповнені, тому це потрібно зробити, якщо
 # true, то створювати і заповнювати не потрібно
-is_database_exists = False
+is_database_exists = True
 
 posgre_con = postgree_connection()
 con = sql_connect()
