@@ -12,9 +12,6 @@ with pg_db:
 
 print('Done')
 
-tempEmps = []
-tempDeps = []
-tempTasks = []
 
 def changeDatabase(x=None):
     db = {
@@ -23,20 +20,36 @@ def changeDatabase(x=None):
     }.get(x, sqlite_db)
     database_proxy.initialize(db)
 
-def exportToPostgres():
-    tempEmps = Employee.select().tuples()
-    tempDeps = Department.select().tuples()
-    tempTasks = Task.select().tuples()
+def exportFromTo(f, t):
 
-    changeDatabase('pg_db')
+    changeDatabase(f)
 
-    Task.delete().where(Task.id > -1).execute()
-    Employee.delete().where(Employee.id > -1).execute()
-    Department.delete().where(Department.id > -1).execute()
+    employees = Employee.select().dicts()
+    departments = Department.select().dicts()
+    tasks = Task.select().dicts()
 
-    # Employee.insert_many(tempEmps).execute()
-    # Department.insert_many(tempDeps).execute()
-    # Task.insert_many(tempTasks).execute()
+    tempEmps = []
+    tempDeps = []
+    tempTasks = []
+
+    for i in range(len(employees)):
+        tempEmps.append(employees[i])
+    for i in range(len(departments)):
+        tempDeps.append(departments[i])
+    for i in range(len(tasks)):
+        tempTasks.append(tasks[i])
+
+    changeDatabase(t)
+
+    Task.drop_table()
+    Employee.drop_table()
+    Department.drop_table()
+
+    database_proxy.create_tables([Department, Employee, Task])
+
+    Department.insert_many(tempDeps).execute()
+    Employee.insert_many(tempEmps).execute()
+    Task.insert_many(tempTasks).execute()
 
 
 # Employee

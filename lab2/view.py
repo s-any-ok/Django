@@ -82,7 +82,6 @@ def tasks_delete_button(taskid):
         print(row)
         table.insert("", END, values=row)
     changeDatabase()
-    exportDatabase()
 
 Button(f4, text="Delete", command=lambda: tasks_delete_button(taskidel.get())).grid(row=6, column=0)
 
@@ -99,9 +98,9 @@ def change_database_button(db):
         print(row)
         table.insert("", END, values=row)
 
-def export_database_button(db):
+def export_database_button(dbFrom, dbTo):
     # очищаємо таблицю
-    exportToPostgres()
+    exportFromTo(dbFrom, dbTo)
     for i in table.get_children():
         table.delete(i)
     rows = tasks_fetch()
@@ -112,8 +111,9 @@ def export_database_button(db):
 Button(f6, text="Set MySql", command=lambda: change_database_button('mysql_db')).grid(row=8, column=0)
 Button(f6, text="Set SqlLite", command=lambda: change_database_button('sqlite_db')).grid(row=10, column=0)
 Button(f6, text="Set Postgres", command=lambda: change_database_button('pg_db')).grid(row=12, column=0)
-Button(f6, text="Export Postgres", command=lambda: export_database_button('pg_db')).grid(row=8, column=1)
 
+Button(f6, text="Export Postgres", command=lambda: export_database_button('sqlite_db', 'pg_db')).grid(row=8, column=1)
+Button(f6, text="Export MySql", command=lambda: export_database_button('pg_db', 'mysql_db')).grid(row=10, column=1)
 
 f5 = Frame()
 f5.pack(side=TOP, pady=20)
